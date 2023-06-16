@@ -15,7 +15,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse<Data>)
         
         case 'POST':
             return postEntry( req, res );
-    
+            
         default:
             return res.status(400).json({ message: 'Enpoit no exite' })
     }
