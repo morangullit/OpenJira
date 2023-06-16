@@ -7,12 +7,12 @@ type Data =
 | { message: string }
 | IEntry
 
-export default function handler (req: NextApiRequest, res: NextApiResponse<Data>) {
+export default function handler ( req: NextApiRequest, res: NextApiResponse<Data> ) {
     
     const { id } = req.query;
 
     if( !mongoose.isValidObjectId(id)){
-        return res.status(400).json({message: 'El id no es valido' + id});
+        return res.status(400).json({ message: 'El id no es valido' + id });
     }
 
     switch (req.method) {
@@ -24,11 +24,11 @@ export default function handler (req: NextApiRequest, res: NextApiResponse<Data>
             
 
         default:
-            return res.status(400).json({message: 'Metodo no existe'});
+            return res.status(400).json({message: 'Metodo no existe' + req.method });
     }
 }
 
-const getEntry = async (req: NextApiRequest, res: NextApiResponse) => {
+const getEntry = async ( req: NextApiRequest, res: NextApiResponse ) => {
 
     const { id } = req.query;
     
@@ -36,8 +36,8 @@ const getEntry = async (req: NextApiRequest, res: NextApiResponse) => {
     const entryInDB = await Entry.findById(id);
     await db.disconnect();
 
-    if(!entryInDB){
-        return res.status(400).json({message: 'No hay entrada con ese ID:' + id})
+    if( !entryInDB ){
+        return res.status(400).json({ message: 'No hay entrada con ese ID:' + id })
     }
 
     return res.status(200).json( entryInDB )
@@ -51,24 +51,25 @@ const updateEntry = async ( req:NextApiRequest, res: NextApiResponse<Data> ) => 
 
     const entryToUpdate = await Entry.findById(id);
 
-    if(!entryToUpdate){
+    if( !entryToUpdate ){
         await db.disconnect();
-        return res.status(400).json({message: 'No hay entrada con ese ID:' + id})
+        return res.status(400).json({ message: 'No hay entrada con ese ID:' + id })
     }
 
     const {
         description = entryToUpdate.description,
-        status = entryToUpdate.status
+        status = entryToUpdate.status,
+        createdAt = entryToUpdate.createdAt
     } = req.body;
 
     try {
-        const updateEntry = await Entry.findByIdAndUpdate(id, {description, status}, {runValidators: true, new: true} );
+        const updateEntry = await Entry.findByIdAndUpdate(id, { description, status, createdAt}, { runValidators: true, new: true } );
         await db.disconnect();
-        res.status(400).json( updateEntry! )
+        res.status(200).json( updateEntry! )
 
     } catch (error: any) {
         console.log({error});
         await db.disconnect();
-        res.status(400).json({message: error.error.status.message})
+        res.status(400).json({ message: error.errors.status.message })
     }
 }
